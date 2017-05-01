@@ -1,19 +1,29 @@
 package com.example.artam.mapspolygons;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -22,15 +32,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "Activity was created");
+        Log.i(TAG, "Activity was created");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        Log.i(TAG, "Activity was created");
 
     }
+
+
 
 
     /**
@@ -44,13 +57,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.i(TAG, "in onMapReady");
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(getApplicationContext(), "Please enable your GPS", Toast.LENGTH_SHORT).show();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(), "Please enable your GPS", Toast.LENGTH_SHORT)
+                    .show();
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -60,7 +77,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+
         mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
+            @Override
+            public boolean onMyLocationButtonClick() {
+                if (isGPSEnabled(getApplicationContext())){
+                    return false;
+                } else Toast.makeText(getApplicationContext(),
+                        "Please enable your GPS for detecting your current position!",
+                        Toast.LENGTH_LONG).show();
+                return true;
+                                }
+        });
+
+
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    public boolean isGPSEnabled (Context mContext){   //http://stackoverflow.com/questions/843675/how-do-i-find-out-if-the-gps-of-an-android-device-is-enabled
+        LocationManager locationManager = (LocationManager)
+                mContext.getSystemService(Context.LOCATION_SERVICE);
+
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+    private void goToLocationZoom(double a, double b, float z){
+        Log.i(TAG, "INgoToLocationZoom");
+        LatLng latLng = new LatLng(a,b);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng,z);
+        mMap.moveCamera(cameraUpdate);
+        Log.i(TAG, "CameraUpdated");
+
+
+    }
+    public void myGeoLocation(View view) throws IOException {
+        Log.i(TAG, "inMyGeoLocation");
+        EditText editText = (EditText) findViewById(R.id.editText);
+        String myLocation = editText.getText().toString();
+
+
+        Geocoder geocoder = new Geocoder(this);
+        List<Address> list = geocoder.getFromLocationName(myLocation, 1);
+        Address address = list.get(0);
+        String locality = address.getLocality();
+
+       // Toast.makeText(this, locality, Toast.LENGTH_LONG).show();
+
+        double latitude = address.getLatitude();
+        double longitude = address.getLongitude();
+        goToLocationZoom(latitude,longitude,15);
+        Log.i(TAG, "end of myGeoLocation");
     }
 }
