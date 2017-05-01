@@ -2,6 +2,7 @@ package com.example.artam.mapspolygons;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -19,15 +20,30 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import static com.example.artam.mapspolygons.R.id.add;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
     private GoogleMap mMap;
+    SharedPreferences sPref;
+
+    Marker marker;
+    String locality;
+    String myLocation;
+    Set <String> markersSet;
+
     final String TAG = "my_logs";
 
     @Override
@@ -41,9 +57,97 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         Log.i(TAG, "Activity was created");
 
+
+
+
     }
 
 
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+
+     //   LatLng markerPosition = marker.getPosition();
+
+     //  double lat = latLng.latitude;
+      // double lng = latLng.longitude;
+
+     //Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
+
+
+        /*List<Address> geoList = null;
+        try {
+            geoList = geocoder.getFromLocation(lat, lng, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Address address = geoList.get(0);
+        String locality = address.getLocality();
+
+        Log.i(TAG, "Address" + add);*/
+
+        markersSet = new HashSet<>();
+        markersSet.add(latLng.toString());
+
+        //String lngString = String.valueOf(lng);
+        //String latString = String.valueOf(lat);
+
+        MarkerOptions options = new MarkerOptions()
+                .position(latLng)
+                .title(latLng.toString())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+        marker = mMap.addMarker(options);
+
+            }
+
+
+
+   /* public String getMarkerkLocation(Marker marker) {
+
+        double lat = marker.getPosition().latitude;
+        double lng = marker.getPosition().longitude;
+
+        return lat, lng;
+
+
+        Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
+
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            Address obj = addresses.get(0);
+            String add = obj.getAddressLine(0);
+
+            Log.i(TAG, "Address" + add);
+
+            return add;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }}
+*/
+
+
+
+    public void addMarkers() throws IOException {
+
+        //  String markersLocation = marker.getPosition().toString();
+
+    }
+
+        public void storeMarkers() {
+
+            sPref = getPreferences(MODE_PRIVATE);
+            SharedPreferences.Editor editor = sPref.edit();
+            editor.putStringSet("markers", markersSet);
+            editor.apply();
+        }
+
+       /* marker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(myLocation)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));*/
 
 
     /**
@@ -60,14 +164,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG, "in onMapReady");
         mMap = googleMap;
 
+        mMap.setOnMapLongClickListener(this);
+
+
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        //LatLng sydney = new LatLng(-34, 151);
+        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(getApplicationContext(), "Please enable your GPS", Toast.LENGTH_SHORT)
-                    .show();
+
+
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -77,6 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+
 
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
@@ -113,13 +221,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void myGeoLocation(View view) throws IOException {
         Log.i(TAG, "inMyGeoLocation");
         EditText editText = (EditText) findViewById(R.id.editText);
-        String myLocation = editText.getText().toString();
+        myLocation = editText.getText().toString();
 
 
         Geocoder geocoder = new Geocoder(this);
         List<Address> list = geocoder.getFromLocationName(myLocation, 1);
         Address address = list.get(0);
-        String locality = address.getLocality();
+        locality = address.getLocality();
 
        // Toast.makeText(this, locality, Toast.LENGTH_LONG).show();
 
@@ -128,4 +236,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         goToLocationZoom(latitude,longitude,15);
         Log.i(TAG, "end of myGeoLocation");
     }
+
+
 }
