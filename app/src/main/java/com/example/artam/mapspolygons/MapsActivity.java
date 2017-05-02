@@ -169,7 +169,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /** Called when the Clear button is clicked. */
+
     public void onClearMarkers(View view) { //Google Maps Android Samples
+
         if (!checkReady()) {
             return;
         }
