@@ -40,7 +40,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     SharedPreferences sPref;
 
     Marker marker;
-    String locality;
     String myLocation;
     Set <String> markersSet;
 
@@ -56,12 +55,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         Log.i(TAG, "Activity was created");
-
-
-
-
     }
-
 
     @Override
     public void onMapLongClick(LatLng latLng) {
@@ -69,32 +63,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         EditText editT = (EditText) findViewById(R.id.editText);
         myLocation = editT.getText().toString();
 
-
-        //   LatLng markerPosition = marker.getPosition();
-
-     //  double lat = latLng.latitude;
-      // double lng = latLng.longitude;
-
-     //Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
-
-
-        /*List<Address> geoList = null;
-        try {
-            geoList = geocoder.getFromLocation(lat, lng, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Address address = geoList.get(0);
-        String locality = address.getLocality();
-
-        Log.i(TAG, "Address" + add);*/
-
         markersSet = new HashSet<>();
         markersSet.add(latLng.toString());
-
-        //String lngString = String.valueOf(lng);
-        //String latString = String.valueOf(lat);
 
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
@@ -106,46 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(getApplicationContext(),
                 "New marker added \n" + latLng.toString(), Toast.LENGTH_LONG)
                 .show();
-
-
             }
-
-
-
-
-
-   /* public String getMarkerkLocation(Marker marker) {
-
-        double lat = marker.getPosition().latitude;
-        double lng = marker.getPosition().longitude;
-
-        return lat, lng;
-
-
-        Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
-
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            Address obj = addresses.get(0);
-            String add = obj.getAddressLine(0);
-
-            Log.i(TAG, "Address" + add);
-
-            return add;
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }}
-*/
-
-
-
-    public void addMarkers() throws IOException {
-
-        //  String markersLocation = marker.getPosition().toString();
-
-    }
 
         public void storeMarkers() {
 
@@ -154,11 +85,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             editor.putStringSet("markers", markersSet);
             editor.apply();
         }
-
-       /* marker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title(myLocation)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));*/
 
     private boolean checkReady() { //Google Maps Android Samples
         if (mMap == null) {
@@ -177,16 +103,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap.clear();
     }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.i(TAG, "in onMapReady");
@@ -195,9 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMapLongClickListener(this);
 
 
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -226,9 +139,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return true;
                                 }
         });
-
-
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     public boolean isGPSEnabled (Context mContext){   //http://stackoverflow.com/questions/843675/how-do-i-find-out-if-the-gps-of-an-android-device-is-enabled
@@ -237,22 +147,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
-    private void goToLocationZoom(double a, double b, float z){
-        Log.i(TAG, "INgoToLocationZoom");
-        LatLng latLng = new LatLng(a,b);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng,z);
-        mMap.moveCamera(cameraUpdate);
-        Log.i(TAG, "CameraUpdated");
 
-
-    }
-
-
-
-       // Toast.makeText(this, locality, Toast.LENGTH_LONG).show();
-
-
-    }
+          }
 
 
 
