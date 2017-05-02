@@ -2,11 +2,13 @@ package com.example.artam.mapspolygons;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
+import android.location.SettingInjectorService;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -36,10 +39,11 @@ import static com.example.artam.mapspolygons.R.id.add;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
-    private GoogleMap mMap;
-    SharedPreferences sPref;
 
-    Marker marker;
+    private GoogleMap mMap;
+    SharedPreferences sPref = null;
+
+    Marker marker = null;
     String myLocation;
     Set <String> markersSet;
 
@@ -55,7 +59,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         Log.i(TAG, "Activity was created");
+
+
+
     }
+
 
     @Override
     public void onMapLongClick(LatLng latLng) {
@@ -76,15 +84,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(getApplicationContext(),
                 "New marker added \n" + latLng.toString(), Toast.LENGTH_LONG)
                 .show();
+//http://stackoverflow.com/questions/22817902/android-g-maps-markers-how-to-store-the-icon-in-shared-preferences
+        sPref.edit().putString("Lat",String.valueOf(latLng.latitude)).apply();
+        sPref.edit().putString("Lng",String.valueOf(latLng.longitude)).apply();
             }
 
         public void storeMarkers() {
-
-            sPref = getPreferences(MODE_PRIVATE);
+           /* sPref = getPreferences(MODE_PRIVATE);
             SharedPreferences.Editor editor = sPref.edit();
             editor.putStringSet("markers", markersSet);
-            editor.apply();
+            editor.apply();*/
+            }
+
+    public void extractMarkers() { //http://stackoverflow.com/questions/22814490/how-to-save-a-marker-onmapclick
+
+        sPref = this.getSharedPreferences("LatLng", MODE_PRIVATE);
+        //Check whether your preferences contains any values then we get those values
+        if ((sPref.contains("Lat")) && (sPref.contains("Lng"))) {
+            String lat = sPref.getString("Lat", "");
+            String lng = sPref.getString("Lng", "");
+            LatLng l = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+
+            mMap.addMarker(new MarkerOptions()
+                    .position(l));
         }
+    }
 
     private boolean checkReady() { //Google Maps Android Samples
         if (mMap == null) {
@@ -105,16 +129,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         Log.i(TAG, "in onMapReady");
         mMap = googleMap;
-
+        extractMarkers();
         mMap.setOnMapLongClickListener(this);
-
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
 
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -125,7 +148,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-
 
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
@@ -147,7 +169,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
-
           }
 
 
