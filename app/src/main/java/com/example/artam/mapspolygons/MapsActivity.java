@@ -99,7 +99,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         marker = mMap.addMarker(options);
 
+        Toast.makeText(getApplicationContext(),
+                "New marker added \n" + latLng.toString(), Toast.LENGTH_LONG)
+                .show();
+
+
             }
+
+
 
 
 
@@ -225,16 +232,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         Geocoder geocoder = new Geocoder(this);
-        List<Address> list = geocoder.getFromLocationName(myLocation, 1);
-        Address address = list.get(0);
-        locality = address.getLocality();
+        try {
+
+            List<Address> list = geocoder.getFromLocationName(myLocation, 1);
+            Address address = list.get(0);
+            locality = address.getLocality();
+
+            double latitude = address.getLatitude();
+            double longitude = address.getLongitude();
+
+            goToLocationZoom(latitude,longitude,15);
+            Log.i(TAG, "end of myGeoLocation");}
+        catch (Exception E){
+            Toast.makeText(getApplicationContext(), "Error: Incorrect place name", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Error: Incorrect place name");
+        }
+
 
        // Toast.makeText(this, locality, Toast.LENGTH_LONG).show();
 
-        double latitude = address.getLatitude();
-        double longitude = address.getLongitude();
-        goToLocationZoom(latitude,longitude,15);
-        Log.i(TAG, "end of myGeoLocation");
+
     }
 
 
