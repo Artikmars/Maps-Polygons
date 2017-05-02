@@ -156,6 +156,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .title(myLocation)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));*/
 
+    private boolean checkReady() { //Google Maps Android Samples
+        if (mMap == null) {
+            Toast.makeText(this, R.string.map_not_ready, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    /** Called when the Clear button is clicked. */
+    public void onClearMap(View view) { //Google Maps Android Samples
+        if (!checkReady()) {
+            return;
+        }
+        mMap.clear();
+    }
 
     /**
      * Manipulates the map once available.
