@@ -66,7 +66,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapLongClick(LatLng latLng) {
 
-     //   LatLng markerPosition = marker.getPosition();
+        EditText editT = (EditText) findViewById(R.id.editText);
+        myLocation = editT.getText().toString();
+
+
+        //   LatLng markerPosition = marker.getPosition();
 
      //  double lat = latLng.latitude;
       // double lng = latLng.longitude;
@@ -94,7 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
-                .title(latLng.toString())
+                .title(myLocation)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
         marker = mMap.addMarker(options);
@@ -240,28 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
-    public void myGeoLocation(View view) throws IOException {
-        Log.i(TAG, "inMyGeoLocation");
-        EditText editText = (EditText) findViewById(R.id.editText);
-        myLocation = editText.getText().toString();
 
-
-        Geocoder geocoder = new Geocoder(this);
-        try {
-
-            List<Address> list = geocoder.getFromLocationName(myLocation, 1);
-            Address address = list.get(0);
-            locality = address.getLocality();
-
-            double latitude = address.getLatitude();
-            double longitude = address.getLongitude();
-
-            goToLocationZoom(latitude,longitude,15);
-            Log.i(TAG, "end of myGeoLocation");}
-        catch (Exception E){
-            Toast.makeText(getApplicationContext(), "Error: Incorrect place name", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Error: Incorrect place name");
-        }
 
 
        // Toast.makeText(this, locality, Toast.LENGTH_LONG).show();
@@ -270,4 +253,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-}
+
