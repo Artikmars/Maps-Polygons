@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
@@ -27,6 +28,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     int markersCount;
     final String TAG = "my_logs";
+    private Polygon mMutablePolygon;
 
     SharedPreferences sPref = null;
     Marker marker = null;
@@ -82,10 +88,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(getApplicationContext(), markersCountStr, Toast.LENGTH_SHORT).show();
 
         // http://stackoverflow.com/questions/22814490/how-to-save-a-marker-onmapclick
-        sPref.edit().putString("Lat" + Integer.toString((markersCount - 1)), Double.toString(latLng.latitude)).apply();
-        sPref.edit().putString("Lng" + Integer.toString((markersCount - 1)), Double.toString(latLng.longitude)).apply();
-        sPref.edit().putString("myLocation", myLocation).apply();
-        sPref.edit().putInt("markersCount", markersCount).apply();
+        if (latLng.latitude != 0 && latLng.longitude != 0) {
+            sPref.edit().putString("Lat" + Integer.toString((markersCount - 1)), Double.toString(latLng.latitude)).apply();
+            sPref.edit().putString("Lng" + Integer.toString((markersCount - 1)), Double.toString(latLng.longitude)).apply();
+            sPref.edit().putString("myLocation", myLocation).apply();
+            sPref.edit().putInt("markersCount", markersCount).apply();
+        }
     }
 
     public void extractMarkers() { //http://stackoverflow.com/questions/35868807/saving-google-map-markers-into-sharedpreferences-in-android-studios
@@ -132,15 +140,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+
+    public void startPolygon(View v) {
+
+        Log.i(TAG, "startPolygon");
+        sPref = this.getSharedPreferences("location", 0);
+        Log.i(TAG, "startPolygon - getSharedPreferences");
+        markersCount = sPref.getInt("markersCount", 0);
+        Log.i(TAG, "startPolygon - get markersCount");
+
+        PolygonOptions polygonOptions = new PolygonOptions();
+
+        if (markersCount > 2) {
+            Log.i(TAG, "startPolygon");
+            String lat = "";
+            String lng = "";
+
+            // Iterating through all the locations stored
+            for (int i = 0; i < markersCount; i++) {
+                Log.i(TAG, "startPolygon - in for loop");
+                // Getting the latitude of the i-th location
+                lat = sPref.getString("Lat" + i, "0");
+                Log.i(TAG, "startPolygon - get lat");
+                // Getting the longitude of the i-th location
+                lng = sPref.getString("Lng" + i, "0");
+                Log.i(TAG, "startPolygon - get lng");
+
+                double lat3 = Double.valueOf(lat);
+                double lng3 = Double.valueOf(lng);
+
+                position1 = new LatLng(lat3, lng3);
+
+                if (lat3 != 0 && lng3 != 0) {
+                    polygonOptions.add(new LatLng(lat3, lng3));
+
+                }
+                //Polyline polyline = mMap.addPolyline(rectOptions);
+
+            }
+        }
+
+        // LatLng centroid = getCentroid(polygonOptions.getPoints());
+        Polygon polygon = mMap.addPolygon(polygonOptions.fillColor(Color.argb(125, 175, 194, 255))
+                .strokeColor(Color.BLUE));
+    }
+
+
+    // http://stackoverflow.com/questions/28838287/calculate-the-area-of-a-polygon-drawn-on-google-maps-in-an-android-application
+
+       /* double area = SphericalUtil.computeArea(polygonOptions.getPoints());
+        area = roundTwoDecimals(area);
+        String unit = " m²";
+        if (area > 1000) {
+            area = roundTwoDecimals(area / 1000);
+            unit = " km²";
+        }
+        mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(area) + unit));*/
+
     /**
      * Called when the Clear button is clicked.
      */
+
+
+    //http://stackoverflow.com/questions/9752334/calculate-centroid-of-android-graphics-path-values-and-find-the-centroids-rela//http://www.androiddevelopersolutions.com/2015/02/android-calculate-center-of-polygon-in.html
+    private LatLng getCentroid(List<LatLng> positions) {
+        double centerX = 0;
+        double centerY = 0;
+        for (LatLng position : positions) {
+            centerX += position.latitude;
+            centerY += position.longitude;
+        }
+        LatLng center = new LatLng(centerX / positions.size(), centerY / positions.size());
+        Toast.makeText(this, "Centroid Lat: " + center.latitude + " Long: " + center.longitude,
+                Toast.LENGTH_LONG).show();
+        return center;
+    }
 
     public void onClearMarkers(View view) { //Google Maps Android Samples
         Log.i(TAG, "onClearMarkers");
 
         mMap.clear();
         sPref.edit().clear().apply();
+        markersCountStr = null;
     }
 
     @Override

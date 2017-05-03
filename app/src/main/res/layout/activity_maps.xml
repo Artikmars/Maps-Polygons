@@ -34,14 +34,14 @@
         android:id="@+id/startPolBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="12dp"
+        android:onClick="startPolygon"
+        android:text="@string/start_polygon"
         android:layout_below="@+id/editText"
-        android:layout_margin="10dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="27dp"
-        android:text="@string/start_polygon" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 <Button
         android:id="@+id/clrMarkersbtn"
         android:layout_width="wrap_content"
