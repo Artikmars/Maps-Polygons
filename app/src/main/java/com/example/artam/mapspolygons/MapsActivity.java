@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.maps.android.SphericalUtil;
+import java.text.DecimalFormat;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -78,6 +80,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
         marker = mMap.addMarker(options);
+        editT.setText("");
 
         Toast.makeText(getApplicationContext(),
                 "New marker added \n" + latLng.toString(), Toast.LENGTH_LONG)
@@ -180,30 +183,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        // LatLng centroid = getCentroid(polygonOptions.getPoints());
+        //http://stackoverflow.com/questions/28838287/calculate-the-area-of-a-polygon-drawn-on-google-maps-in-an-android-application
+
+        LatLng centroid = computeCentroid(polygonOptions.getPoints());
         Polygon polygon = mMap.addPolygon(polygonOptions.fillColor(Color.argb(125, 175, 194, 255))
                 .strokeColor(Color.BLUE));
+
+        double totalarea = SphericalUtil.computeArea(polygonOptions.getPoints());
+        String areaunit = " m²";
+        if(totalarea>1000000){
+            totalarea=totalarea/1000000;
+            areaunit=" km²";
+        }
+        DecimalFormat twoDForm = new DecimalFormat("#.##");//http://stackoverflow.com/questions/7472519/how-to-round-decimal-numbers-in-android
+        totalarea = Double.valueOf(twoDForm.format(totalarea));
+
+        mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(totalarea)+areaunit));
     }
 
-
-    // http://stackoverflow.com/questions/28838287/calculate-the-area-of-a-polygon-drawn-on-google-maps-in-an-android-application
-
-       /* double area = SphericalUtil.computeArea(polygonOptions.getPoints());
-        area = roundTwoDecimals(area);
-        String unit = " m²";
-        if (area > 1000) {
-            area = roundTwoDecimals(area / 1000);
-            unit = " km²";
-        }
-        mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(area) + unit));*/
-
-    /**
-     * Called when the Clear button is clicked.
-     */
-
-
     //http://stackoverflow.com/questions/9752334/calculate-centroid-of-android-graphics-path-values-and-find-the-centroids-rela//http://www.androiddevelopersolutions.com/2015/02/android-calculate-center-of-polygon-in.html
-    private LatLng getCentroid(List<LatLng> positions) {
+    private LatLng computeCentroid(List<LatLng> positions) {
         double centerX = 0;
         double centerY = 0;
         for (LatLng position : positions) {
