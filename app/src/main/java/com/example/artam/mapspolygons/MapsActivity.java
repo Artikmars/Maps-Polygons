@@ -31,7 +31,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.maps.android.SphericalUtil;
+
 import java.text.DecimalFormat;
+
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import static android.R.attr.value;
 import static com.example.artam.mapspolygons.R.id.add;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
@@ -88,7 +91,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         markersCount++;
         markersCountStr = Integer.toString(markersCount);
-        Toast.makeText(getApplicationContext(), markersCountStr, Toast.LENGTH_SHORT).show();
 
         // http://stackoverflow.com/questions/22814490/how-to-save-a-marker-onmapclick
         if (latLng.latitude != 0 && latLng.longitude != 0) {
@@ -155,7 +157,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PolygonOptions polygonOptions = new PolygonOptions();
 
         if (markersCount > 2) {
-            Log.i(TAG, "startPolygon");
+            Log.i(TAG, "startPolygon - markers > 2");
             String lat = "";
             String lng = "";
 
@@ -188,17 +190,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng centroid = computeCentroid(polygonOptions.getPoints());
         Polygon polygon = mMap.addPolygon(polygonOptions.fillColor(Color.argb(125, 175, 194, 255))
                 .strokeColor(Color.BLUE));
+        Log.i(TAG, "startPolygon - polygon is built");
 
         double totalarea = SphericalUtil.computeArea(polygonOptions.getPoints());
         String areaunit = " m²";
-        if(totalarea>1000000){
-            totalarea=totalarea/1000000;
-            areaunit=" km²";
+        if (totalarea > 1000000) {
+            totalarea = totalarea / 1000000;
+            areaunit = " km²";
         }
-        DecimalFormat twoDForm = new DecimalFormat("#.##");//http://stackoverflow.com/questions/7472519/how-to-round-decimal-numbers-in-android
-        totalarea = Double.valueOf(twoDForm.format(totalarea));
+        Log.i(TAG, "startPolygon - total area is computed");
 
-        mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(totalarea)+areaunit));
+      /*  DecimalFormat twoDForm = new DecimalFormat("#.##");//http://stackoverflow.com/questions/7472519/how-to-round-decimal-numbers-in-android
+        totalarea = Double.valueOf(twoDForm.format(totalarea));*/
+        totalarea = Math.round(totalarea * 100.0) / 100.0;
+        Log.i(TAG, "startPolygon - total area is rounded");
+
+        mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(totalarea) + areaunit));
+        Log.i(TAG, "startPolygon - a centroid marker is added");
     }
 
     //http://stackoverflow.com/questions/9752334/calculate-centroid-of-android-graphics-path-values-and-find-the-centroids-rela//http://www.androiddevelopersolutions.com/2015/02/android-calculate-center-of-polygon-in.html
@@ -210,7 +218,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             centerY += position.longitude;
         }
         LatLng center = new LatLng(centerX / positions.size(), centerY / positions.size());
-        Toast.makeText(this, "Centroid Lat: " + center.latitude + " Long: " + center.longitude,
+        Toast.makeText(this, "Centroid Lat: " + center.latitude + "\n Lng: " + center.longitude,
                 Toast.LENGTH_LONG).show();
         return center;
     }
@@ -219,8 +227,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG, "onClearMarkers");
 
         mMap.clear();
+        Log.i(TAG, "onClearMarkers - mapClear");
         sPref.edit().clear().apply();
+        Log.i(TAG, "onClearMarkers - sPref cleared");
         markersCountStr = null;
+        Log.i(TAG, "onClearMarkers - markersCountStr is null");
     }
 
     @Override

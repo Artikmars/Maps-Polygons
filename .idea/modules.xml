@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Maps-Polygons.iml" filepath="$PROJECT_DIR$/Maps-Polygons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MapsPolygons.iml" filepath="$PROJECT_DIR$/MapsPolygons.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/sample_polygon/sample_polygon.iml" filepath="$PROJECT_DIR$/sample_polygon/sample_polygon.iml" />
     </modules>
