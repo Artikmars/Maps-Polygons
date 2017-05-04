@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -56,8 +57,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     SharedPreferences sPref = null;
     Marker marker = null;
-    String myLocation, markersCountStr;
+    String myLocation, markersCountStr, strButton;
     LatLng position1;
+    Button btnStartPolygon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        btnStartPolygon = (Button) findViewById(R.id.startPolBtn);
     }
 
     @Override
@@ -147,66 +150,80 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     public void startPolygon(View v) {
+        strButton = btnStartPolygon.getText().toString();
+        if (strButton.equals("Start Polygon")) {
+            btnStartPolygon.setText("End Polygon");
+            Log.i(TAG, "startPolygon");
+            sPref = this.getSharedPreferences("location", 0);
+            Log.i(TAG, "startPolygon - getSharedPreferences");
+            markersCount = sPref.getInt("markersCount", 0);
+            Log.i(TAG, "startPolygon - get markersCount");
 
-        Log.i(TAG, "startPolygon");
-        sPref = this.getSharedPreferences("location", 0);
-        Log.i(TAG, "startPolygon - getSharedPreferences");
-        markersCount = sPref.getInt("markersCount", 0);
-        Log.i(TAG, "startPolygon - get markersCount");
+            PolygonOptions polygonOptions = new PolygonOptions();
 
-        PolygonOptions polygonOptions = new PolygonOptions();
 
-        if (markersCount > 2) {
-            Log.i(TAG, "startPolygon - markers > 2");
-            String lat = "";
-            String lng = "";
+            if (markersCount > 2) {
+                Log.i(TAG, "startPolygon - markers > 2");
+                String lat = "";
+                String lng = "";
 
-            // Iterating through all the locations stored
-            for (int i = 0; i < markersCount; i++) {
-                Log.i(TAG, "startPolygon - in for loop");
-                // Getting the latitude of the i-th location
-                lat = sPref.getString("Lat" + i, "0");
-                Log.i(TAG, "startPolygon - get lat");
-                // Getting the longitude of the i-th location
-                lng = sPref.getString("Lng" + i, "0");
-                Log.i(TAG, "startPolygon - get lng");
+                // Iterating through all the locations stored
+                for (int i = 0; i < markersCount; i++) {
+                    Log.i(TAG, "startPolygon - in for loop");
+                    // Getting the latitude of the i-th location
+                    lat = sPref.getString("Lat" + i, "0");
+                    Log.i(TAG, "startPolygon - get lat");
+                    // Getting the longitude of the i-th location
+                    lng = sPref.getString("Lng" + i, "0");
+                    Log.i(TAG, "startPolygon - get lng");
 
-                double lat3 = Double.valueOf(lat);
-                double lng3 = Double.valueOf(lng);
 
-                position1 = new LatLng(lat3, lng3);
+                    double lat3 = Double.valueOf(lat);
+                    double lng3 = Double.valueOf(lng);
 
-                if (lat3 != 0 && lng3 != 0) {
-                    polygonOptions.add(new LatLng(lat3, lng3));
+                    position1 = new LatLng(lat3, lng3);
+
+                    if (lat3 != 0 && lng3 != 0) {
+                        polygonOptions.add(new LatLng(lat3, lng3));
+
+                    }
+                    //Polyline polyline = mMap.addPolyline(rectOptions);
 
                 }
-                //Polyline polyline = mMap.addPolyline(rectOptions);
-
             }
-        }
 
-        //http://stackoverflow.com/questions/28838287/calculate-the-area-of-a-polygon-drawn-on-google-maps-in-an-android-application
+            //http://stackoverflow.com/questions/28838287/calculate-the-area-of-a-polygon-drawn-on-google-maps-in-an-android-application
 
-        LatLng centroid = computeCentroid(polygonOptions.getPoints());
-        Polygon polygon = mMap.addPolygon(polygonOptions.fillColor(Color.argb(125, 175, 194, 255))
-                .strokeColor(Color.BLUE));
-        Log.i(TAG, "startPolygon - polygon is built");
 
-        double totalarea = SphericalUtil.computeArea(polygonOptions.getPoints());
-        String areaunit = " m²";
-        if (totalarea > 1000000) {
-            totalarea = totalarea / 1000000;
-            areaunit = " km²";
-        }
-        Log.i(TAG, "startPolygon - total area is computed");
+            LatLng centroid = computeCentroid(polygonOptions.getPoints());
+            Polygon polygon = mMap.addPolygon(polygonOptions.fillColor(Color.argb(125, 175, 194, 255))
+                    .strokeColor(Color.BLUE));
+            Log.i(TAG, "startPolygon - polygon is built");
+
+            double totalarea = SphericalUtil.computeArea(polygonOptions.getPoints());
+            String areaunit = " m²";
+            if (totalarea > 1000000) {
+                totalarea = totalarea / 1000000;
+                areaunit = " km²";
+            }
+            //Log.i(TAG, "startPolygon - total area is computed");
 
       /*  DecimalFormat twoDForm = new DecimalFormat("#.##");//http://stackoverflow.com/questions/7472519/how-to-round-decimal-numbers-in-android
         totalarea = Double.valueOf(twoDForm.format(totalarea));*/
-        totalarea = Math.round(totalarea * 100.0) / 100.0;
-        Log.i(TAG, "startPolygon - total area is rounded");
+            totalarea = Math.round(totalarea * 100.0) / 100.0;
+            Log.i(TAG, "startPolygon - total area is rounded");
 
-        mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(totalarea) + areaunit));
-        Log.i(TAG, "startPolygon - a centroid marker is added");
+            mMap.addMarker(new MarkerOptions().position(centroid).title(String.valueOf(totalarea) + areaunit));
+
+            Log.i(TAG, "startPolygon - a centroid marker is added");
+
+        } else {
+            btnStartPolygon.setText("Start Polygon");
+            mMap.clear();
+            sPref.edit().clear().apply();
+            markersCountStr = null;
+            markersCount = 0;
+        }
     }
 
     //http://stackoverflow.com/questions/9752334/calculate-centroid-of-android-graphics-path-values-and-find-the-centroids-rela//http://www.androiddevelopersolutions.com/2015/02/android-calculate-center-of-polygon-in.html
@@ -225,13 +242,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onClearMarkers(View view) { //Google Maps Android Samples
         Log.i(TAG, "onClearMarkers");
-
+        btnStartPolygon.setText("Start Polygon");
         mMap.clear();
         Log.i(TAG, "onClearMarkers - mapClear");
         sPref.edit().clear().apply();
         Log.i(TAG, "onClearMarkers - sPref cleared");
         markersCountStr = null;
+
         Log.i(TAG, "onClearMarkers - markersCountStr is null");
+        markersCount = 0;
+
     }
 
     @Override
